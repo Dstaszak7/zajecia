@@ -1,0 +1,45 @@
+pipeline {
+    agent any
+
+    environment {
+        // Ścieżka do wirtualnego środowiska, jeśli chcesz
+        VENV = "venv"
+    }
+
+    stages {
+        stage('Checkout') {
+            steps {
+                // Pobranie kodu z GitHub
+                git url: 'https://github.com/Dstaszak7/zajecia', branch: 'main'
+            }
+        }
+
+        stage('Setup Python') {
+            steps {
+                // Tworzenie wirtualnego środowiska
+                sh 'python3 -m venv ${VENV}'
+                // Aktywacja i instalacja zależności (jeśli masz requirements.txt)
+                sh '''
+                    source ${VENV}/bin/activate
+                    pip install --upgrade pip
+                    if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+                '''
+            }
+        }
+
+        stage('Run Script') {
+            steps {
+                sh '''
+                    source ${VENV}/bin/activate
+                    python sort_ds.py
+                '''
+            }
+        }
+    }
+
+    post {
+        always {
+            echo 'Pipeline finished'
+        }
+    }
+}
